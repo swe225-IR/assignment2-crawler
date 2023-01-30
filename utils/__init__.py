@@ -3,6 +3,7 @@ import logging
 from hashlib import sha256
 from urllib.parse import urlparse
 
+
 def get_logger(name, filename=None):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
@@ -13,7 +14,7 @@ def get_logger(name, filename=None):
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
     formatter = logging.Formatter(
-       "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
     # add the handlers to the logger
@@ -28,6 +29,7 @@ def get_urlhash(url):
     return sha256(
         f"{parsed.netloc}/{parsed.path}/{parsed.params}/"
         f"{parsed.query}/{parsed.fragment}".encode("utf-8")).hexdigest()
+
 
 def normalize(url):
     if url.endswith("/"):
