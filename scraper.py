@@ -47,12 +47,12 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
                     if parsed.scheme == '':
                         if parsed.netloc == '':  # href = "/xxxxx"
                             links[
-                                i] = cur_lk_p.scheme + "://" + cur_lk_p.netloc + parsed.path + parsed.params + parsed.query
+                                i] = f"{cur_lk_p.scheme}://{cur_lk_p.netloc}{parsed.path};{parsed.params}?{parsed.query}"
                         else:  # href = "//www.xxx.xxx/xxxxxx"
                             links[
-                                i] = cur_lk_p.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
-                    elif parsed.fragment != '':
-                        links[i] = parsed.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
+                                i] = f"{cur_lk_p.scheme}://{parsed.netloc}{parsed.path};{parsed.params}?{parsed.query}"
+                    elif parsed.fragment != '':  # href = "https://www.xxx.xxx/xxxxxx/#ssssss"
+                        links[i] = f"{parsed.scheme}://{parsed.netloc}{parsed.path};{parsed.params}?{parsed.query}"
             else:
                 return links
     else:  # to handle redirect 403, 405, etc.
