@@ -1,6 +1,21 @@
 # IR Assignment2
 
-authors: Shilong Li, Wenjun Huang, Yang Liu
+Authors: Shilong Li, Wenjun Huang, Yang Liu
+
+## How to run this project on Windows
+
+1. on Windows: `ssh <your-uci-netid>@open.ics.uci.edu`
+2. On linux: `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh`
+3. On linux: `chmod +x Miniconda3-latest-Linux-x86_64.sh`
+4. on Linux: `bash ./Miniconda3-latest-Linux-x86_64.sh` (all <yes>)
+5. On Windows: `git clone https://github.com/swe225-IR/assignment2-crawler.git`
+6. On Windows: `scp -r ./assignment2-crawler <your-uci-netid>@open.ics.uci.edu: ~/projects/`
+7. On linux: `cd ~/projects/assignment2-cralwer`
+8. On linux: `conda create -n a2 python=3.10 && conda activate a2`
+9. On linux: `chmod +x ./setup.sh && ./setup.sh`
+10. Modify `config.ini`
+10. On linux: `python launch.py`
+11. If want to delete the crawler log before, just `chmod +x ./clean.sh && ./clean.sh`
 
 ## Requirements
 
