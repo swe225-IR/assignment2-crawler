@@ -37,7 +37,7 @@ class Frontier(object):
                     self.add_url(url)
 
     def _parse_save_file(self):
-        ''' This function can be overridden for alternate saving techniques. '''
+        """ This function can be overridden for alternate saving techniques. """
         total_count = len(self.save)
         tbd_count = 0
         for url, completed in self.save.values():
