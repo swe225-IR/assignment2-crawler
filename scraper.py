@@ -23,6 +23,16 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     links = list()
     # ## todo: what if resp.url does not equal to the url (redirect ?)
+    """
+    processing:
+    <a href="URL">
+        URL can be:
+            An absolute URL - points to another web site (like href="http://www.example.com/default.htm")
+            A relative URL - points to a file within a web site (like href="default.htm")
+            Link to an element with a specified id within the page (like href="#section2")
+            Other protocols (like https://, ftp://, mailto:, file:, etc..)
+            A script (like href="javascript:alert('Hello');")
+    """
     if resp.status == 200:
         if not resp.raw_response.content:
             return links
