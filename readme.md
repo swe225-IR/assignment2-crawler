@@ -4,7 +4,7 @@ Authors: Shilong Li, Wenjun Huang, Yang Liu
 
 ## How to run this project on Windows
 
-1. on Windows: `ssh <your-uci-netid>@open.ics.uci.edu`
+1. on Windows: `ssh <your-uci-netid>@openlab.ics.uci.edu`
 2. On linux: `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh`
 3. On linux: `chmod +x Miniconda3-latest-Linux-x86_64.sh`
 4. on Linux: `bash ./Miniconda3-latest-Linux-x86_64.sh` (all <yes>)
