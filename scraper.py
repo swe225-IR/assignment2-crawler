@@ -22,7 +22,8 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     links = list()
-    # ## todo: what if resp.url does not equal to the url (redirect ?)
+    # todo: 1. what if resp.url does not equal to the url (redirect ?)
+    # todo: 2. 跑一会会trap https://swiki.ics.uci.edu/doku.php/projects:maint-spring-2021?tab_details=edit&do=media&tab_files=files&image=virtual_environments%3Ajupyterhub%3Anotebooks.jpg&ns=security
     """
     processing:
     <a href="URL">
@@ -45,14 +46,11 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
                 for i in range(0, len(links)):
                     parsed = urlparse(links[i])
                     if parsed.scheme == '':
+                        n_url = parsed.geturl().split("#", 1)[0]
                         if parsed.netloc == '':  # href = "/xxxxx"
-                            links[
-                                i] = f"{cur_lk_p.scheme}://{cur_lk_p.netloc}{parsed.path};{parsed.params}?{parsed.query}"
+                            links[i] = f"{cur_lk_p.scheme}://{cur_lk_p.netloc}{n_url}"
                         else:  # href = "//www.xxx.xxx/xxxxxx"
-                            links[
-                                i] = f"{cur_lk_p.scheme}://{parsed.netloc}{parsed.path};{parsed.params}?{parsed.query}"
-                    elif parsed.fragment != '':  # href = "https://www.xxx.xxx/xxxxxx/#ssssss"
-                        links[i] = f"{parsed.scheme}://{parsed.netloc}{parsed.path};{parsed.params}?{parsed.query}"
+                            links[i] = f"{cur_lk_p.scheme}:{n_url}"
             else:
                 return links
     else:  # to handle redirect 403, 405, etc.
