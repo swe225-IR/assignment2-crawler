@@ -31,7 +31,7 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             link_nodes = root.xpath("//a")
             if link_nodes:
                 this_link_parsed = urlparse(resp.url)
-                next_links = [x.get('href') for x in link_nodes]
+                next_links = [x.get('href') for x in link_nodes if x.get('href')]  # some href attribute is None
                 for i in range(0, len(next_links)):
                     parsed = urlparse(next_links[i])
                     if parsed.scheme == '':
@@ -52,7 +52,7 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
 
 
 def is_valid(url: str) -> bool:
-    # Decide whether to crawl this url or not. 
+    # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
