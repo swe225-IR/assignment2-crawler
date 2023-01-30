@@ -1,1 +1,1 @@
-rm -rf Logs/ && rm -f frontier.shelf.*
+rm -rf Logs/ && rm -f frontier.shelve.*
