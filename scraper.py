@@ -21,34 +21,33 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    next_links = list()
+    links = list()
     # ## todo: what if resp.url does not equal to the url (redirect ?)
     if resp.status == 200:
         if not resp.raw_response.content:
-            return next_links
+            return links
         else:
             root = etree.HTML(resp.raw_response.content)
-            link_nodes = root.xpath("//a")
-            if link_nodes:
-                this_link_parsed = urlparse(resp.url)
-                next_links = [x.get('href') for x in link_nodes if x.get('href')]  # some href attribute is None
-                for i in range(0, len(next_links)):
-                    parsed = urlparse(next_links[i])
+            a_nodes = root.xpath("//a")
+            if a_nodes:
+                cur_lk_p = urlparse(resp.url)
+                links = [x.get('href') for x in a_nodes if x.get('href')]  # some href attribute is None
+                for i in range(0, len(links)):
+                    parsed = urlparse(links[i])
                     if parsed.scheme == '':
                         if parsed.netloc == '':  # href = "/xxxxx"
-                            next_links[
-                                i] = this_link_parsed.scheme + this_link_parsed.netloc + parsed.path + parsed.params + parsed.query
+                            links[
+                                i] = cur_lk_p.scheme + "://" + cur_lk_p.netloc + parsed.path + parsed.params + parsed.query
                         else:  # href = "//www.xxx.xxx/xxxxxx"
-                            next_links[
-                                i] = this_link_parsed.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
+                            links[
+                                i] = cur_lk_p.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
                     elif parsed.fragment != '':
-                        next_links[
-                            i] = parsed.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
+                        links[i] = parsed.scheme + "://" + parsed.netloc + parsed.path + parsed.params + parsed.query
             else:
-                return next_links
+                return links
     else:  # to handle redirect 403, 405, etc.
         print(resp.error)
-    return next_links
+    return links
 
 
 def is_valid(url: str) -> bool:
