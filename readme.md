@@ -14,8 +14,8 @@ Authors: Shilong Li, Wenjun Huang, Yang Liu
 8. On linux: `conda create -n a2 python=3.10 && conda activate a2`
 9. On linux: `chmod +x ./setup.sh && ./setup.sh`
 10. Modify `config.ini`
-10. On linux: `python launch.py`
-11. If want to delete the crawler log before, just `chmod +x ./clean.sh && ./clean.sh`
+11. On linux: `python launch.py`
+12. If you want to delete the crawler log before, just `chmod +x ./clean.sh && ./clean.sh`
 
 ## Requirements
 
