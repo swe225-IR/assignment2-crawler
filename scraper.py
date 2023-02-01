@@ -1,7 +1,7 @@
 import re
 from typing import List
 from lxml import etree
-from urllib.parse import urlparse
+from urllib.parse import urlparse, ParseResult
 
 from utils.response import Response
 
@@ -24,6 +24,9 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
     links = list()
     # todo: 1. what if resp.url does not equal to the url (redirect ?)
     # todo: 2. 跑一会会trap https://swiki.ics.uci.edu/doku.php/projects:maint-spring-2021?tab_details=edit&do=media&tab_files=files&image=virtual_environments%3Ajupyterhub%3Anotebooks.jpg&ns=security
+    # 续上：我们需要处理parameter调换的情况
+    # todo: 3. https://urldefense.com/v3/__https:/rloganiv.github.io/__;!!CzAuKJ42GuquVTTmVmPViYEvSg!Pe8w9cwoRSztNHlTyrGJlybQ4ZD_5-oWKbzxvTlVr09ZfoUzeTWj07XuyrEktXsDyERsM1m61D8GD7Y$
+    # -> solution: https://help.proofpoint.com/Threat_Insight_Dashboard/Concepts/How_do_I_decode_a_rewritten_URL%3F
     """
     processing:
     <a href="URL">
@@ -33,6 +36,8 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             Link to an element with a specified id within the page (like href="#section2")
             Other protocols (like https://, ftp://, mailto:, file:, etc..)
             A script (like href="javascript:alert('Hello');")
+        URL: https  ://    www.a.b.c  /path/to/file   ;    a=b;c=d  ?    e=f&r=z
+            scheme           netloc       path             params         query
     """
     if resp.status == 200:
         if not resp.raw_response.content:
@@ -44,13 +49,18 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
                 cur_lk_p = urlparse(resp.url)
                 links = [x.get('href') for x in a_nodes if x.get('href')]  # some href attribute is None
                 for i in range(0, len(links)):
-                    parsed = urlparse(links[i])
-                    if parsed.scheme == '':
-                        n_url = parsed.geturl().split("#", 1)[0]
-                        if parsed.netloc == '':  # href = "/xxxxx"
-                            links[i] = f"{cur_lk_p.scheme}://{cur_lk_p.netloc}{n_url}"
-                        else:  # href = "//www.xxx.xxx/xxxxxx"
-                            links[i] = f"{cur_lk_p.scheme}:{n_url}"
+                    if is_url_defense(links[i]):
+                        pass
+                    else:
+                        parsed = urlparse(links[i])
+                        url_processed = handle_urls(links[i], parsed)
+                        if parsed.scheme == '':
+                            if parsed.netloc == '':  # href = "/xxxxx"
+                                links[i] = f"{cur_lk_p.scheme}://{cur_lk_p.netloc}{url_processed}"
+                            else:  # href = "//www.xxx.xxx/xxxxxx"
+                                links[i] = f"{cur_lk_p.scheme}:{url_processed}"
+                        else:
+                            links[i] = url_processed
             else:
                 return links
     else:  # to handle redirect 403, 405, etc.
@@ -85,3 +95,50 @@ def is_valid(url: str) -> bool:
     except TypeError:
         print("TypeError for ", parsed)
         raise
+
+
+def handle_urls(origin_url: str, parsed: ParseResult) -> str:
+    if parsed.query == '' and parsed.params == '':
+        return parsed.geturl().split("#")[0]
+    elif parsed.query == '' and parsed.params != '':
+        params_str = handle_params_or_query(parsed.params, ";")
+        p_id = origin_url.find(";")
+        return f'{origin_url[:p_id]}?{params_str}'
+    elif parsed.query != '' and parsed.params == '':
+        query_str = handle_params_or_query(parsed.query, "&")
+        q_id = origin_url.find("?")
+        return f'{origin_url[:q_id]}?{query_str}'
+    else:
+        query_str = handle_params_or_query(parsed.query, "&")
+        params_str = handle_params_or_query(parsed.params, ";")
+        p_id = origin_url.find(";")
+        return f'{origin_url[:p_id]};{params_str}?{query_str}'
+
+
+def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
+    pair = params_or_query_str.split(separator)
+    result_list = list()
+    for p in pair:
+        pair_list = p.split("=")
+        result_list.append((pair_list[0], pair_list[1]))
+    result_list.sort()
+    url_partial = ''
+    for r in result_list:
+        url_partial += f'{r[0]}={r[1]}{separator}'
+    return url_partial[:-1]
+
+
+def is_url_defense(url: str) -> bool:
+    return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
+
+
+if __name__ == '__main__':
+    url1 = "https://swiki.ics.uci.edu/doku.php/announce:fall-2020?tab_details=view&do=media&tab_files=upload&image=virtual_environments%3Ajupyterhub%3Ajupyter-troubleshooting-1.png&ns=services"
+    url2 = "https://swiki.ics.uci.edu/doku.php/announce:fall-2020?image=virtual_environments%3Ajupyterhub%3Ajupyter-troubleshooting-1.png&tab_details=view&do=media&tab_files=upload&ns=services"
+    print(url1)
+    print(handle_urls(url1, parsed=urlparse(url1)))
+    print(url2)
+    print(handle_urls(url2, parsed=urlparse(url2)))
+    print(url1 == handle_urls(url1, parsed=urlparse(url1)))
+    print(url2 == handle_urls(url2, parsed=urlparse(url2)))
+    print(handle_urls(url1, parsed=urlparse(url1)) == handle_urls(url2, parsed=urlparse(url2)))
