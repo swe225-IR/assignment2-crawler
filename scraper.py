@@ -120,7 +120,10 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
     result_list = list()
     for p in pair:
         pair_list = p.split("=")
-        result_list.append((pair_list[0], pair_list[1]))
+        if len(pair_list) == 2:
+            result_list.append((pair_list[0], pair_list[1]))
+        else:
+            result_list.append((pair_list[0],''))
     result_list.sort()
     url_partial = ''
     for r in result_list:
