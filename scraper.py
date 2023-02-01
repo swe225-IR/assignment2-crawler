@@ -40,7 +40,7 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             scheme           netloc       path             params         query
     """
     if resp.status == 200:
-        if not resp.raw_response.content:
+        if not resp.raw_response or not resp.raw_response.content:
             return links
         else:
             root = etree.HTML(resp.raw_response.content)
