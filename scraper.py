@@ -38,6 +38,8 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             A script (like href="javascript:alert('Hello');")
         URL: https  ://    www.a.b.c  /path/to/file   ;    a=b;c=d  ?    e=f&r=z
             scheme           netloc       path             params         query
+            注意：params 存在这种情况：https://www.a.b.c/path;a 没有等于号，我在下面做了处理
+                query为了防止万一，我也做了处理
     """
     if resp.status == 200:
         if not resp.raw_response or not resp.raw_response.content:
