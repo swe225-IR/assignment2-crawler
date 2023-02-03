@@ -75,7 +75,7 @@ def is_valid(url: str) -> bool:
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        parsed = urlparse(url)
+        parsed = urlparse(url) # Parse a URL into 6 components: <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
         if parsed.scheme not in {"http", "https"}:
             return False
         elif re.match(
