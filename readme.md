@@ -55,5 +55,5 @@ See [report](./Assignment-Report.md).
 
 ### Additional Libraries
 ```commandline
-pip install lxml
+pip install lxml nltk bs4
 ```
