@@ -1,7 +1,7 @@
-if __name__ == '__main__':
+def count_distinct_url(path: str):
     l = set()
     error_code = set()
-    with open(r"../Logs/Worker.log", 'r') as f:
+    with open(path, 'r') as f:
         while True:
             i = f.readline()
             if i:
