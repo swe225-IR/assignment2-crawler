@@ -93,7 +93,7 @@ def is_valid(url: str) -> bool:
         elif not re.match(r"(.*\.(i?cs|informatics|stat)|today)\.uci\.edu$", parsed.netloc.lower()):
             return False
         elif (re.match(r"^today\.uci\.edu$", parsed.netloc) and not re.match(
-                r"^/department/information_computer_sciences/\.*", parsed.path)):
+                r"^/department/information_computer_sciences/\.*", parsed.path)):  # todo: 没看见这个url
             return False
         return True
     except TypeError:
@@ -102,6 +102,12 @@ def is_valid(url: str) -> bool:
 
 
 def handle_urls(origin_url: str, parsed: ParseResult) -> str:
+    """
+    processing URL string
+    :param origin_url: URL of this web page
+    :param parsed: urlparse(origin_url)
+    :return: sorted string
+    """
     if parsed.query == '' and parsed.params == '':
         return parsed.geturl().split("#")[0]
     elif parsed.query == '' and parsed.params != '':
@@ -120,6 +126,12 @@ def handle_urls(origin_url: str, parsed: ParseResult) -> str:
 
 
 def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
+    """
+    to handle the situation that two params or query strings are exactly the same except for the order
+    :param params_or_query_str: params or params1=value1;params2=value2 or query1=value1&query2=value2
+    :param separator: ; or &
+    :return: sorted list
+    """
     pair = params_or_query_str.split(separator)
     result_list = list()
     for p in pair:
@@ -132,20 +144,8 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
     url_partial = ''
     for r in result_list:
         url_partial += f'{r[0]}={r[1]}{separator}'
-    return url_partial[:-1]
+    return url_partial[:-1]  # discarding the separator at the end
 
 
 def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
-
-
-if __name__ == '__main__':
-    url1 = "https://swiki.ics.uci.edu/doku.php/announce:fall-2020?tab_details=view&do=media&tab_files=upload&image=virtual_environments%3Ajupyterhub%3Ajupyter-troubleshooting-1.png&ns=services"
-    url2 = "https://swiki.ics.uci.edu/doku.php/announce:fall-2020?image=virtual_environments%3Ajupyterhub%3Ajupyter-troubleshooting-1.png&tab_details=view&do=media&tab_files=upload&ns=services"
-    print(url1)
-    print(handle_urls(url1, parsed=urlparse(url1)))
-    print(url2)
-    print(handle_urls(url2, parsed=urlparse(url2)))
-    print(url1 == handle_urls(url1, parsed=urlparse(url1)))
-    print(url2 == handle_urls(url2, parsed=urlparse(url2)))
-    print(handle_urls(url1, parsed=urlparse(url1)) == handle_urls(url2, parsed=urlparse(url2)))
