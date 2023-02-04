@@ -177,6 +177,9 @@ def extract_words(resp: Response) -> List[str]:
     :return: Standardized words
     '''
     words = []
+    if resp.status != 200:
+        return words
+
     if not resp.raw_response or not resp.raw_response.content:
         return words
 
