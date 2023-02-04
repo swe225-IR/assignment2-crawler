@@ -1,0 +1,468 @@
+Help on WordNetCorpusReader in module nltk.corpus.reader.wordnet object:
+
+class WWoorrddNNeettCCoorrppuussRReeaaddeerr(nltk.corpus.reader.api.CorpusReader)
+ |  WordNetCorpusReader(root, omw_reader)
+ |  
+ |  A corpus reader used to access wordnet or its variants.
+ |  
+ |  Method resolution order:
+ |      WordNetCorpusReader
+ |      nltk.corpus.reader.api.CorpusReader
+ |      builtins.object
+ |  
+ |  Methods defined here:
+ |  
+ |  ____iinniitt____(self, root, omw_reader)
+ |      Construct a new wordnet corpus reader, with the given root
+ |      directory.
+ |  
+ |  aadddd__eexxoommww(self)
+ |      Add languages from Extended OMW
+ |      
+ |      >>> import nltk
+ |      >>> from nltk.corpus import wordnet as wn
+ |      >>> wn.add_exomw()
+ |      >>> print(wn.synset('intrinsically.r.01').lemmas(lang="eng_wikt"))
+ |      [Lemma('intrinsically.r.01.per_se'), Lemma('intrinsically.r.01.as_such')]
+ |  
+ |  aadddd__oommww(self)
+ |  
+ |  aadddd__pprroovvss(self, reader)
+ |      Add languages from Multilingual Wordnet to the provenance dictionary
+ |  
+ |  aallll__eenngg__ssyynnsseettss(self, pos=None)
+ |  
+ |  aallll__lleemmmmaa__nnaammeess(self, pos=None, lang='eng')
+ |      Return all lemma names for all synsets for the given
+ |      part of speech tag and language or languages. If pos is
+ |      not specified, all synsets for all parts of speech will
+ |      be used.
+ |  
+ |  aallll__oommww__ssyynnsseettss(self, pos=None, lang=None)
+ |  
+ |  aallll__ssyynnsseettss(self, pos=None, lang='eng')
+ |      Iterate over all synsets with a given part of speech tag.
+ |      If no pos is specified, all synsets for all parts of speech
+ |      will be loaded.
+ |  
+ |  cciittaattiioonn(self, lang='eng')
+ |      Return the contents of citation.bib file (for omw)
+ |      use lang=lang to get the citation for an individual language
+ |  
+ |  ccuussttoomm__lleemmmmaass(self, tab_file, lang)
+ |      Reads a custom tab file containing mappings of lemmas in the given
+ |      language to Princeton WordNet 3.0 synset offsets, allowing NLTK's
+ |      WordNet functions to then be used with that language.
+ |      
+ |      See the "Tab files" section at https://omwn.org/omw1.html for
+ |      documentation on the Multilingual WordNet tab file format.
+ |      
+ |      :param tab_file: Tab file as a file or file-like object
+ |      :type: lang str
+ |      :param: lang ISO 639-3 code of the language of the tab file
+ |  
+ |  ddiiggrraapphh(self, inputs, rel=<function WordNetCorpusReader.<lambda> at 0x7efc88136710>, pos=None, maxdepth=-1, shapes=None, attr=None, verbose=False)
+ |      Produce a graphical representation from 'inputs' (a list of
+ |      start nodes, which can be a mix of Synsets, Lemmas and/or words),
+ |      and a synset relation, for drawing with the 'dot' graph visualisation
+ |      program from the Graphviz package.
+ |      
+ |      Return a string in the DOT graph file language, which can then be
+ |      converted to an image by nltk.parse.dependencygraph.dot2img(dot_string).
+ |      
+ |      Optional Parameters:
+ |      :rel: Wordnet synset relation
+ |      :pos: for words, restricts Part of Speech to 'n', 'v', 'a' or 'r'
+ |      :maxdepth: limit the longest path
+ |      :shapes: dictionary of strings that trigger a specified shape
+ |      :attr: dictionary with global graph attributes
+ |      :verbose: warn about cycles
+ |      
+ |      >>> from nltk.corpus import wordnet as wn
+ |      >>> print(wn.digraph([wn.synset('dog.n.01')]))
+ |      digraph G {
+ |      "Synset('animal.n.01')" -> "Synset('organism.n.01')";
+ |      "Synset('canine.n.02')" -> "Synset('carnivore.n.01')";
+ |      "Synset('carnivore.n.01')" -> "Synset('placental.n.01')";
+ |      "Synset('chordate.n.01')" -> "Synset('animal.n.01')";
+ |      "Synset('dog.n.01')" -> "Synset('canine.n.02')";
+ |      "Synset('dog.n.01')" -> "Synset('domestic_animal.n.01')";
+ |      "Synset('domestic_animal.n.01')" -> "Synset('animal.n.01')";
+ |      "Synset('living_thing.n.01')" -> "Synset('whole.n.02')";
+ |      "Synset('mammal.n.01')" -> "Synset('vertebrate.n.01')";
+ |      "Synset('object.n.01')" -> "Synset('physical_entity.n.01')";
+ |      "Synset('organism.n.01')" -> "Synset('living_thing.n.01')";
+ |      "Synset('physical_entity.n.01')" -> "Synset('entity.n.01')";
+ |      "Synset('placental.n.01')" -> "Synset('mammal.n.01')";
+ |      "Synset('vertebrate.n.01')" -> "Synset('chordate.n.01')";
+ |      "Synset('whole.n.02')" -> "Synset('object.n.01')";
+ |      }
+ |      <BLANKLINE>
+ |  
+ |  ddiissaabbllee__ccuussttoomm__lleemmmmaass(self, lang)
+ |      prevent synsets from being mistakenly added
+ |  
+ |  ddoocc(self, file='README', lang='eng')
+ |      Return the contents of readme, license or citation file
+ |      use lang=lang to get the file for an individual language
+ |  
+ |  ggeett__vveerrssiioonn(self)
+ |  
+ |  iicc(self, corpus, weight_senses_equally=False, smoothing=1.0)
+ |      Creates an information content lookup dictionary from a corpus.
+ |      
+ |      :type corpus: CorpusReader
+ |      :param corpus: The corpus from which we create an information
+ |          content dictionary.
+ |      :type weight_senses_equally: bool
+ |      :param weight_senses_equally: If this is True, gives all
+ |          possible senses equal weight rather than dividing by the
+ |          number of possible senses.  (If a word has 3 synses, each
+ |          sense gets 0.3333 per appearance when this is False, 1.0 when
+ |          it is true.)
+ |      :param smoothing: How much do we smooth synset counts (default is 1.0)
+ |      :type smoothing: float
+ |      :return: An information content dictionary
+ |  
+ |  iinnddeexx__sseennssee(self, version=None)
+ |      Read sense key to synset id mapping from index.sense file in corpus directory
+ |  
+ |  jjccnn__ssiimmiillaarriittyy(self, synset1, synset2, ic, verbose=False)
+ |      Jiang-Conrath Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      Information Content (IC) of the Least Common Subsumer (most specific
+ |      ancestor node) and that of the two input Synsets. The relationship is
+ |      given by the equation 1 / (IC(s1) + IC(s2) - 2 * IC(lcs)).
+ |      
+ |      :type  other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type  ic: dict
+ |      :param ic: an information content object (as returned by
+ |          ``nltk.corpus.wordnet_ic.ic()``).
+ |      :return: A float score denoting the similarity of the two ``Synset``
+ |          objects.
+ |  
+ |  llaannggss(self)
+ |      return a list of languages supported by Multilingual Wordnet
+ |  
+ |  llcchh__ssiimmiillaarriittyy(self, synset1, synset2, verbose=False, simulate_root=True)
+ |      Leacock Chodorow Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      shortest path that connects the senses (as above) and the maximum depth
+ |      of the taxonomy in which the senses occur. The relationship is given as
+ |      -log(p/2d) where p is the shortest path length and d is the taxonomy
+ |      depth.
+ |      
+ |      :type  other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type simulate_root: bool
+ |      :param simulate_root: The various verb taxonomies do not
+ |          share a single root which disallows this metric from working for
+ |          synsets that are not connected. This flag (True by default)
+ |          creates a fake root that connects all the taxonomies. Set it
+ |          to false to disable this behavior. For the noun taxonomy,
+ |          there is usually a default root except for WordNet version 1.6.
+ |          If you are using wordnet 1.6, a fake root will be added for nouns
+ |          as well.
+ |      :return: A score denoting the similarity of the two ``Synset`` objects,
+ |          normally greater than 0. None is returned if no connecting path
+ |          could be found. If a ``Synset`` is compared with itself, the
+ |          maximum score is returned, which varies depending on the taxonomy
+ |          depth.
+ |  
+ |  lleemmmmaa(self, name, lang='eng')
+ |      Return lemma object that matches the name
+ |  
+ |  lleemmmmaa__ccoouunntt(self, lemma)
+ |      Return the frequency count for this Lemma
+ |  
+ |  lleemmmmaa__ffrroomm__kkeeyy(self, key)
+ |  
+ |  lleemmmmaass(self, lemma, pos=None, lang='eng')
+ |      Return all Lemma objects with a name matching the specified lemma
+ |      name and part of speech tag. Matches any part of speech tag if none is
+ |      specified.
+ |  
+ |  lliicceennssee(self, lang='eng')
+ |      Return the contents of LICENSE (for omw)
+ |      use lang=lang to get the license for an individual language
+ |  
+ |  lliinn__ssiimmiillaarriittyy(self, synset1, synset2, ic, verbose=False)
+ |      Lin Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      Information Content (IC) of the Least Common Subsumer (most specific
+ |      ancestor node) and that of the two input Synsets. The relationship is
+ |      given by the equation 2 * IC(lcs) / (IC(s1) + IC(s2)).
+ |      
+ |      :type other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type ic: dict
+ |      :param ic: an information content object (as returned by
+ |          ``nltk.corpus.wordnet_ic.ic()``).
+ |      :return: A float score denoting the similarity of the two ``Synset``
+ |          objects, in the range 0 to 1.
+ |  
+ |  mmaapp__ttoo__mmaannyy(self)
+ |  
+ |  mmaapp__ttoo__oonnee(self)
+ |  
+ |  mmaapp__wwnn3300(self)
+ |      Mapping from Wordnet 3.0 to currently loaded Wordnet version
+ |  
+ |  mmoorrpphhyy(self, form, pos=None, check_exceptions=True)
+ |      Find a possible base form for the given form, with the given
+ |      part of speech, by checking WordNet's list of exceptional
+ |      forms, and by recursively stripping affixes for this part of
+ |      speech until a form in WordNet is found.
+ |      
+ |      >>> from nltk.corpus import wordnet as wn
+ |      >>> print(wn.morphy('dogs'))
+ |      dog
+ |      >>> print(wn.morphy('churches'))
+ |      church
+ |      >>> print(wn.morphy('aardwolves'))
+ |      aardwolf
+ |      >>> print(wn.morphy('abaci'))
+ |      abacus
+ |      >>> wn.morphy('hardrock', wn.ADV)
+ |      >>> print(wn.morphy('book', wn.NOUN))
+ |      book
+ |      >>> wn.morphy('book', wn.ADJ)
+ |  
+ |  ooff22ssss(self, of)
+ |      take an id and return the synsets
+ |  
+ |  ppaatthh__ssiimmiillaarriittyy(self, synset1, synset2, verbose=False, simulate_root=True)
+ |      Path Distance Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      shortest path that connects the senses in the is-a (hypernym/hypnoym)
+ |      taxonomy. The score is in the range 0 to 1, except in those cases where
+ |      a path cannot be found (will only be true for verbs as there are many
+ |      distinct verb taxonomies), in which case None is returned. A score of
+ |      1 represents identity i.e. comparing a sense with itself will return 1.
+ |      
+ |      :type other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type simulate_root: bool
+ |      :param simulate_root: The various verb taxonomies do not
+ |          share a single root which disallows this metric from working for
+ |          synsets that are not connected. This flag (True by default)
+ |          creates a fake root that connects all the taxonomies. Set it
+ |          to false to disable this behavior. For the noun taxonomy,
+ |          there is usually a default root except for WordNet version 1.6.
+ |          If you are using wordnet 1.6, a fake root will be added for nouns
+ |          as well.
+ |      :return: A score denoting the similarity of the two ``Synset`` objects,
+ |          normally between 0 and 1. None is returned if no connecting path
+ |          could be found. 1 is returned if a ``Synset`` is compared with
+ |          itself.
+ |  
+ |  rreeaaddmmee(self, lang='eng')
+ |      Return the contents of README (for omw)
+ |      use lang=lang to get the readme for an individual language
+ |  
+ |  rreess__ssiimmiillaarriittyy(self, synset1, synset2, ic, verbose=False)
+ |      Resnik Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      Information Content (IC) of the Least Common Subsumer (most specific
+ |      ancestor node).
+ |      
+ |      :type  other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type ic: dict
+ |      :param ic: an information content object (as returned by
+ |          ``nltk.corpus.wordnet_ic.ic()``).
+ |      :return: A float score denoting the similarity of the two ``Synset``
+ |          objects. Synsets whose LCS is the root node of the taxonomy will
+ |          have a score of 0 (e.g. N['dog'][0] and N['table'][0]).
+ |  
+ |  ssss22ooff(self, ss)
+ |      return the ID of the synset
+ |  
+ |  ssyynnoonnyymmss(self, word, lang='eng')
+ |      return nested list with the synonyms of the different senses of word in the given language
+ |  
+ |  ssyynnsseett(self, name)
+ |      #############################################################
+ |      # Loading Synsets
+ |      #############################################################
+ |  
+ |  ssyynnsseett__ffrroomm__ppooss__aanndd__ooffffsseett(self, pos, offset)
+ |      - pos: The synset's part of speech, matching one of the module level
+ |        attributes ADJ, ADJ_SAT, ADV, NOUN or VERB ('a', 's', 'r', 'n', or 'v').
+ |      - offset: The byte offset of this synset in the WordNet dict file
+ |        for this pos.
+ |      
+ |      >>> from nltk.corpus import wordnet as wn
+ |      >>> print(wn.synset_from_pos_and_offset('n', 1740))
+ |      Synset('entity.n.01')
+ |  
+ |  ssyynnsseett__ffrroomm__sseennssee__kkeeyy(self, sense_key)
+ |      Retrieves synset based on a given sense_key. Sense keys can be
+ |      obtained from lemma.key()
+ |      
+ |      From https://wordnet.princeton.edu/documentation/senseidx5wn:
+ |      A sense_key is represented as::
+ |      
+ |          lemma % lex_sense (e.g. 'dog%1:18:01::')
+ |      
+ |      where lex_sense is encoded as::
+ |      
+ |          ss_type:lex_filenum:lex_id:head_word:head_id
+ |      
+ |      :lemma:       ASCII text of word/collocation, in lower case
+ |      :ss_type:     synset type for the sense (1 digit int)
+ |                    The synset type is encoded as follows::
+ |      
+ |                        1    NOUN
+ |                        2    VERB
+ |                        3    ADJECTIVE
+ |                        4    ADVERB
+ |                        5    ADJECTIVE SATELLITE
+ |      :lex_filenum: name of lexicographer file containing the synset for the sense (2 digit int)
+ |      :lex_id:      when paired with lemma, uniquely identifies a sense in the lexicographer file (2 digit int)
+ |      :head_word:   lemma of the first word in satellite's head synset
+ |                    Only used if sense is in an adjective satellite synset
+ |      :head_id:     uniquely identifies sense in a lexicographer file when paired with head_word
+ |                    Only used if head_word is present (2 digit int)
+ |      
+ |      >>> import nltk
+ |      >>> from nltk.corpus import wordnet as wn
+ |      >>> print(wn.synset_from_sense_key("drive%1:04:03::"))
+ |      Synset('drive.n.06')
+ |      
+ |      >>> print(wn.synset_from_sense_key("driving%1:04:03::"))
+ |      Synset('drive.n.06')
+ |  
+ |  ssyynnsseettss(self, lemma, pos=None, lang='eng', check_exceptions=True)
+ |      Load all synsets with a given lemma and part of speech tag.
+ |      If no pos is specified, all synsets for all parts of speech
+ |      will be loaded.
+ |      If lang is specified, all the synsets associated with the lemma name
+ |      of that language will be returned.
+ |  
+ |  wwoorrddss(self, lang='eng')
+ |      return lemmas of the given language as list of words
+ |  
+ |  wwuupp__ssiimmiillaarriittyy(self, synset1, synset2, verbose=False, simulate_root=True)
+ |      Wu-Palmer Similarity:
+ |      Return a score denoting how similar two word senses are, based on the
+ |      depth of the two senses in the taxonomy and that of their Least Common
+ |      Subsumer (most specific ancestor node). Previously, the scores computed
+ |      by this implementation did _not_ always agree with those given by
+ |      Pedersen's Perl implementation of WordNet Similarity. However, with
+ |      the addition of the simulate_root flag (see below), the score for
+ |      verbs now almost always agree but not always for nouns.
+ |      
+ |      The LCS does not necessarily feature in the shortest path connecting
+ |      the two senses, as it is by definition the common ancestor deepest in
+ |      the taxonomy, not closest to the two senses. Typically, however, it
+ |      will so feature. Where multiple candidates for the LCS exist, that
+ |      whose shortest path to the root node is the longest will be selected.
+ |      Where the LCS has multiple paths to the root, the longer path is used
+ |      for the purposes of the calculation.
+ |      
+ |      :type  other: Synset
+ |      :param other: The ``Synset`` that this ``Synset`` is being compared to.
+ |      :type simulate_root: bool
+ |      :param simulate_root: The various verb taxonomies do not
+ |          share a single root which disallows this metric from working for
+ |          synsets that are not connected. This flag (True by default)
+ |          creates a fake root that connects all the taxonomies. Set it
+ |          to false to disable this behavior. For the noun taxonomy,
+ |          there is usually a default root except for WordNet version 1.6.
+ |          If you are using wordnet 1.6, a fake root will be added for nouns
+ |          as well.
+ |      :return: A float score denoting the similarity of the two ``Synset``
+ |          objects, normally greater than zero. If no connecting path between
+ |          the two senses can be found, None is returned.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |  
+ |  AADDJJ = 'a'
+ |  
+ |  AADDJJ__SSAATT = 's'
+ |  
+ |  AADDVV = 'r'
+ |  
+ |  MMOORRPPHHOOLLOOGGIICCAALL__SSUUBBSSTTIITTUUTTIIOONNSS = {'a': [('er', ''), ('est', ''), ('er', '...
+ |  
+ |  NNOOUUNN = 'n'
+ |  
+ |  VVEERRBB = 'v'
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from nltk.corpus.reader.api.CorpusReader:
+ |  
+ |  ____rreepprr____(self)
+ |      Return repr(self).
+ |  
+ |  aabbssppaatthh(self, fileid)
+ |      Return the absolute path for the given file.
+ |      
+ |      :type fileid: str
+ |      :param fileid: The file identifier for the file whose path
+ |          should be returned.
+ |      :rtype: PathPointer
+ |  
+ |  aabbssppaatthhss(self, fileids=None, include_encoding=False, include_fileid=False)
+ |      Return a list of the absolute paths for all fileids in this corpus;
+ |      or for the given list of fileids, if specified.
+ |      
+ |      :type fileids: None or str or list
+ |      :param fileids: Specifies the set of fileids for which paths should
+ |          be returned.  Can be None, for all fileids; a list of
+ |          file identifiers, for a specified set of fileids; or a single
+ |          file identifier, for a single file.  Note that the return
+ |          value is always a list of paths, even if ``fileids`` is a
+ |          single file identifier.
+ |      
+ |      :param include_encoding: If true, then return a list of
+ |          ``(path_pointer, encoding)`` tuples.
+ |      
+ |      :rtype: list(PathPointer)
+ |  
+ |  eennccooddiinngg(self, file)
+ |      Return the unicode encoding for the given corpus file, if known.
+ |      If the encoding is unknown, or if the given file should be
+ |      processed using byte strings (str), then return None.
+ |  
+ |  eennssuurree__llooaaddeedd(self)
+ |      Load this corpus (if it has not already been loaded).  This is
+ |      used by LazyCorpusLoader as a simple method that can be used to
+ |      make sure a corpus is loaded -- e.g., in case a user wants to
+ |      do help(some_corpus).
+ |  
+ |  ffiilleeiiddss(self)
+ |      Return a list of file identifiers for the fileids that make up
+ |      this corpus.
+ |  
+ |  ooppeenn(self, file)
+ |      Return an open stream that can be used to read the given file.
+ |      If the file's encoding is not None, then the stream will
+ |      automatically decode the file's contents into unicode.
+ |      
+ |      :param file: The file identifier of the file to read.
+ |  
+ |  rraaww(self, fileids=None)
+ |      :param fileids: A list specifying the fileids that should be used.
+ |      :return: the given file(s) as a single string.
+ |      :rtype: str
+ |  
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from nltk.corpus.reader.api.CorpusReader:
+ |  
+ |  rroooott
+ |      The directory where this corpus is stored.
+ |      
+ |      :type: PathPointer
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from nltk.corpus.reader.api.CorpusReader:
+ |  
+ |  ____ddiicctt____
+ |      dictionary for instance variables (if defined)
+ |  
+ |  ____wweeaakkrreeff____
+ |      list of weak references to the object (if defined)
