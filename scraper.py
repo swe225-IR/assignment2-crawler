@@ -46,6 +46,8 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             return links
         else:
             root = etree.HTML(resp.raw_response.content)
+            if not root:
+                return links
             a_nodes = root.xpath("//a")
             if a_nodes:
                 cur_lk_p = urlparse(resp.url)
@@ -75,7 +77,7 @@ def is_valid(url: str) -> bool:
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        parsed = urlparse(url) # Parse a URL into 6 components: <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
+        parsed = urlparse(url)  # Parse a URL into 6 components: <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
         if parsed.scheme not in {"http", "https"}:
             return False
         elif re.match(
@@ -125,7 +127,7 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
         if len(pair_list) == 2:
             result_list.append((pair_list[0], pair_list[1]))
         else:
-            result_list.append((pair_list[0],''))
+            result_list.append((pair_list[0], ''))
     result_list.sort()
     url_partial = ''
     for r in result_list:
