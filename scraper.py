@@ -111,18 +111,18 @@ def handle_urls(origin_url: str, parsed: ParseResult) -> str:
     if parsed.query == '' and parsed.params == '':
         return parsed.geturl().split("#")[0]
     elif parsed.query == '' and parsed.params != '':
-        params_str = handle_params_or_query(parsed.params, ";")
+        # params_str = handle_params_or_query(parsed.params, ";")
         p_id = origin_url.find(";")
-        return f'{origin_url[:p_id]};{params_str}'
+        return f'{origin_url[:p_id]}'
     elif parsed.query != '' and parsed.params == '':
-        query_str = handle_params_or_query(parsed.query, "&")
+        # query_str = handle_params_or_query(parsed.query, "&")
         q_id = origin_url.find("?")
-        return f'{origin_url[:q_id]}?{query_str}'
+        return f'{origin_url[:q_id]}'
     else:
-        query_str = handle_params_or_query(parsed.query, "&")
-        params_str = handle_params_or_query(parsed.params, ";")
+        # query_str = handle_params_or_query(parsed.query, "&")
+        # params_str = handle_params_or_query(parsed.params, ";")
         p_id = origin_url.find(";")
-        return f'{origin_url[:p_id]};{params_str}?{query_str}'
+        return f'{origin_url[:p_id]}'
 
 
 def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
