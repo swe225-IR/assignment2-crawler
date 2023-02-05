@@ -200,6 +200,8 @@ def standardize_words(text: str) -> List[str]:
     :param text: Web content
     :return: Standardized words
     """
+    # todo: 1. logger()函数获取所有pages累积的words字典
+    # todo: 2. current_page_word = 0
     words = []
     lemmatizer = WordNetLemmatizer()
     unstandardized_words = word_tokenize(text.lower())
@@ -214,6 +216,8 @@ def standardize_words(text: str) -> List[str]:
         if wordnet_tag == '':
             continue
         elif wordnet_tag == 'add':
+            # todo: replace the code blow
+            # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
             words.append(word_pos_tag[0])
         else:
             # Lemmatization
@@ -223,7 +227,11 @@ def standardize_words(text: str) -> List[str]:
             if stopwords_filter(standardize_word) == '':
                 continue
             else:
+                # todo: 3. 同2
                 words.append(standardize_word)
+    # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
+    # todo: 5. logger()保存2个pkl
+
     return words
 
 
@@ -259,6 +267,22 @@ def stopwords_filter(word: str) -> str:
     if word in STOP_WORDS:
         return ''
     return word
+
+
+def logger(f_path:str, read:bool) -> dict:
+    """
+    :param f_path: File path
+    :param read: True: read, False: save
+    :return: Dict from pkl file
+    """
+
+    # todo: 读取2个 pkl文件
+    # todo: current_page_count = 0
+    # todo: f_all_pages_words = open("f_all_pages_words.pkl")
+    # todo: all_pages_words = pickle.load(f_all_pages_words)
+    # todo: f_all_pages_words.close()
+    pass
+
 
 
 
