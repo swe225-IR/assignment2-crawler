@@ -113,7 +113,7 @@ def handle_urls(origin_url: str, parsed: ParseResult) -> str:
     elif parsed.query == '' and parsed.params != '':
         params_str = handle_params_or_query(parsed.params, ";")
         p_id = origin_url.find(";")
-        return f'{origin_url[:p_id]}?{params_str}'
+        return f'{origin_url[:p_id]};{params_str}'
     elif parsed.query != '' and parsed.params == '':
         query_str = handle_params_or_query(parsed.query, "&")
         q_id = origin_url.find("?")
@@ -139,7 +139,10 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
         if len(pair_list) == 2:
             result_list.append((pair_list[0], pair_list[1]))
         else:
-            result_list.append((pair_list[0], ''))
+            if p[0] == '=':
+                result_list.append(('', pair_list[0]))
+            else:
+                result_list.append((pair_list[0], ''))
     result_list.sort()
     url_partial = ''
     for r in result_list:
