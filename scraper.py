@@ -5,8 +5,45 @@ from urllib.parse import urlparse, ParseResult
 
 from utils.response import Response
 
+from bs4 import BeautifulSoup
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem.wordnet import WordNetLemmatizer
+import pickle as pkl
+import os
+from collections import Counter
+
+TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
+TAGS_VERB = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'VP']
+TAGS_ADJ = ['JJ', 'JJR', 'JJS', 'ADJP', 'ADVP']
+TAGS_NOUN = ['NN', 'NNS', 'NNP', 'NNPS', 'NP']
+TAGS_ADV = ['RB', 'RBR', 'RBS']
+ADV_OTHERS = ['CD', 'EX', 'MD', 'UH', 'WDT', 'WP', 'WP$', 'WRB', 'SBAR', 'PRT', 'INTJ', 'PNP', '-SBJ', '-OBJ']
+STOP_WORDS = {'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't",
+              'as',
+              'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', "can't",
+              'cannot', 'could', "couldn't", 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down',
+              'during', 'each', 'few', 'for', 'from', 'further', 'had', "hadn't", 'has', "hasn't", 'have', "haven't",
+              'having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself',
+              'his', 'how', "how's", 'i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is', "isn't", 'it', "it's",
+              'its', 'itself', "let's", 'me', 'more', 'most', "mustn't", 'my', 'myself', 'no', 'nor', 'not', 'of',
+              'off',
+              'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'same',
+              "shan't", 'she', "she'd", "she'll", "she's", 'should', "shouldn't", 'so', 'some', 'such', 'than', 'that',
+              "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they',
+              "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until',
+              'up',
+              'very', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's",
+              'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with',
+              "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself',
+              'yourselves'}
+WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn', 'weren'}
+
 
 def scraper(url: str, resp: Response) -> List[str]:
+    # words = extract_words(url, resp)
+    extract_words(url, resp)
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -141,10 +178,7 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
         if len(pair_list) == 2:
             result_list.append((pair_list[0], pair_list[1]))
         else:
-            if p[0] == '=':
-                result_list.append(('', pair_list[0]))
-            else:
-                result_list.append((pair_list[0], ''))
+            result_list.append((pair_list[0], ''))
     result_list.sort()
     url_partial = ''
     for r in result_list:
@@ -154,3 +188,124 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
 
 def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
+
+
+def extract_words(url: str, resp: Response) -> List[str]:
+    '''
+    Retrieve and standardize word.
+    :param resp: URL response
+    :return: Standardized words
+    '''
+    words = []
+    if resp.status != 200:
+        return words
+
+    if not resp.raw_response or not resp.raw_response.content:
+        return words
+
+    html = etree.HTML(resp.raw_response.content)
+    soup = BeautifulSoup(etree.tostring(html).decode('utf-8'), features="html.parser")
+    raw = soup.get_text()
+    standardize_words(url, raw.lower())
+    # return standardize_words(url, raw.lower())
+
+
+def standardize_words(url: str, text: str) -> List[str]:
+    """
+    Standardize words and filter stopword
+    At first, we get the classification of words according to nltk library.
+    Second, we do an initial filter for special cases like special character.
+    Third, we do a second filter and lemmatization based on the classification.
+    Forth, we do a final filter based on stopword.
+    :param text: Web content
+    :return: Standardized words
+    """
+    # todo: 1. logger()函数获取所有pages累积的words字典
+    # todo: 2. current_page_word = 0
+    counter_all_word_num_path, counter_page_word_num_path = 'counter_all_word_num.pkl', 'counter_page_word_num.pkl'
+    counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
+    current_page_word_num = 0
+    lemmatizer = WordNetLemmatizer()
+    unstandardized_words = word_tokenize(text.lower())
+    word_pos_tags = nltk.pos_tag(unstandardized_words)
+    for word_pos_tag in word_pos_tags:
+        # Special case filter
+        if special_case_filter(word_pos_tag[0]) == '':
+            continue
+        # Get the classification of words and do the initial filter
+        wordnet_tag = pos_tags_filter(word_pos_tag[1])
+        if wordnet_tag == '':
+            continue
+        elif wordnet_tag == 'add':
+            # todo: replace the code blow
+            # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
+            counter_all_word_num.update([word_pos_tag[0]])
+            current_page_word_num += 1
+        else:
+            # Lemmatization
+            standardize_word = lemmatizer.lemmatize(word_pos_tag[0], wordnet_tag)
+
+            # Remove stopwords
+            if stopwords_filter(standardize_word) == '':
+                continue
+            else:
+                counter_all_word_num.update([standardize_word])
+                current_page_word_num += 1
+    # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
+    # todo: 5. logger()保存2个pkl
+    counter_page_word_num.update({url: current_page_word_num})
+    logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
+    # return words
+
+
+def special_case_filter(word: str) -> str:
+    if len(word) == 1:
+        return ''
+    elif (len(word) >= 2) and (word in WORD_ABBREVIATION):
+        return ''
+    return word
+
+
+def pos_tags_filter(tag: str) -> str:
+    """
+    Filter the words that belong to the tags we do not need and get wordnet compatible tags
+    :param tag: Pos tags
+    :return: Wordnet compatible tags
+    """
+    if tag in TAGS_ADJ:
+        return nltk.corpus.wordnet.ADJ
+    elif tag in TAGS_VERB:
+        return nltk.corpus.wordnet.VERB
+    elif tag in TAGS_NOUN:
+        return nltk.corpus.wordnet.NOUN
+    elif tag in TAGS_ADV:
+        return nltk.corpus.wordnet.ADV
+    elif tag in ADV_OTHERS:
+        return 'add'
+    else:
+        return ''
+
+
+def stopwords_filter(word: str) -> str:
+    if word in STOP_WORDS:
+        return ''
+    return word
+
+
+def logger(f_path:str, dict=None) -> dict:
+    """
+    :param f_path: File path
+    :param dict: None: read, else: the dictionary for save
+    :return: Dict from pkl file
+    """
+    if dict is None:
+        if os.path.isfile(f_path) is False:
+            return Counter()
+        f = open(f_path, 'rb')
+        counter = pkl.load(f)
+        f.close()
+        return counter
+    else:
+        f = open(f_path, 'wb')
+        pkl.dump(dict, f)
+        f.close()
