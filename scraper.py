@@ -11,6 +11,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 import pickle as pkl
+import os
+from collections import Counter
 
 TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
 TAGS_VERB = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'VP']
@@ -221,7 +223,7 @@ def standardize_words(url: str, text: str) -> List[str]:
         elif wordnet_tag == 'add':
             # todo: replace the code blow
             # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
-            counter_all_word_num.update(word_pos_tag[0])
+            counter_all_word_num.update([word_pos_tag[0]])
             current_page_word_num += 1
         else:
             # Lemmatization
@@ -231,7 +233,7 @@ def standardize_words(url: str, text: str) -> List[str]:
             if stopwords_filter(standardize_word) == '':
                 continue
             else:
-                counter_all_word_num.update(standardize_word)
+                counter_all_word_num.update([standardize_word])
                 current_page_word_num += 1
     # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
     # todo: 5. logger()保存2个pkl
@@ -281,6 +283,8 @@ def logger(f_path:str, dict=None) -> dict:
     :return: Dict from pkl file
     """
     if dict is None:
+        if os.path.isfile(f_path) is False:
+            return Counter()
         f = open(f_path, 'rb')
         counter = pkl.load(f)
         f.close()
