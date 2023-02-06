@@ -83,6 +83,8 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             return links
         else:
             root = etree.HTML(resp.raw_response.content)
+            if not root:
+                return links
             a_nodes = root.xpath("//a")
             if a_nodes:
                 cur_lk_p = urlparse(resp.url)
@@ -128,7 +130,9 @@ def is_valid(url: str) -> bool:
         elif not re.match(r"(.*\.(i?cs|informatics|stat)|today)\.uci\.edu$", parsed.netloc.lower()):
             return False
         elif (re.match(r"^today\.uci\.edu$", parsed.netloc) and not re.match(
-                r"^/department/information_computer_sciences/\.*", parsed.path)):
+                r"^/department/information_computer_sciences/\.*", parsed.path)):  # todo: 没看见这个url
+            return False
+        elif re.match(r"gitlab\.ics\.uci\.edu", parsed.netloc):
             return False
         return True
     except TypeError:
@@ -137,12 +141,18 @@ def is_valid(url: str) -> bool:
 
 
 def handle_urls(origin_url: str, parsed: ParseResult) -> str:
+    """
+    processing URL string
+    :param origin_url: URL of this web page
+    :param parsed: urlparse(origin_url)
+    :return: sorted string
+    """
     if parsed.query == '' and parsed.params == '':
         return parsed.geturl().split("#")[0]
     elif parsed.query == '' and parsed.params != '':
         params_str = handle_params_or_query(parsed.params, ";")
         p_id = origin_url.find(";")
-        return f'{origin_url[:p_id]}?{params_str}'
+        return f'{origin_url[:p_id]};{params_str}'
     elif parsed.query != '' and parsed.params == '':
         query_str = handle_params_or_query(parsed.query, "&")
         q_id = origin_url.find("?")
@@ -155,6 +165,12 @@ def handle_urls(origin_url: str, parsed: ParseResult) -> str:
 
 
 def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
+    """
+    to handle the situation that two params or query strings are exactly the same except for the order
+    :param params_or_query_str: params or params1=value1;params2=value2 or query1=value1&query2=value2
+    :param separator: ; or &
+    :return: sorted list
+    """
     pair = params_or_query_str.split(separator)
     result_list = list()
     for p in pair:
@@ -167,7 +183,7 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
     url_partial = ''
     for r in result_list:
         url_partial += f'{r[0]}={r[1]}{separator}'
-    return url_partial[:-1]
+    return url_partial[:-1]  # discarding the separator at the end
 
 
 def is_url_defense(url: str) -> bool:
@@ -293,9 +309,3 @@ def logger(f_path:str, dict=None) -> dict:
         f = open(f_path, 'wb')
         pkl.dump(dict, f)
         f.close()
-
-
-
-
-
-
