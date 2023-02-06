@@ -91,7 +91,7 @@ def is_valid(url: str) -> bool:
                 + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
             return False
         elif not re.match(r"(.*\.(i?cs|informatics|stat)|today)\.uci\.edu$", parsed.netloc.lower()):
-            return False`
+            return False
         elif (re.match(r"^today\.uci\.edu$", parsed.netloc) and not re.match(
                 r"^/department/information_computer_sciences/\.*", parsed.path)):  # todo: 没看见这个url
             return False
