@@ -10,6 +10,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
+import pickle as pkl
 
 TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
 TAGS_VERB = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'VP']
@@ -39,7 +40,8 @@ WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'ar
 
 
 def scraper(url: str, resp: Response) -> List[str]:
-    words = extract_words(resp)
+    # words = extract_words(url, resp)
+    extract_words(url, resp)
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -170,7 +172,7 @@ def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
 
 
-def extract_words(resp: Response) -> List[str]:
+def extract_words(url: str, resp: Response) -> List[str]:
     '''
     Retrieve and standardize word.
     :param resp: URL response
@@ -186,11 +188,11 @@ def extract_words(resp: Response) -> List[str]:
     html = etree.HTML(resp.raw_response.content)
     soup = BeautifulSoup(etree.tostring(html).decode('utf-8'), features="html.parser")
     raw = soup.get_text()
+    standardize_words(url, raw.lower())
+    # return standardize_words(url, raw.lower())
 
-    return standardize_words(raw.lower())
 
-
-def standardize_words(text: str) -> List[str]:
+def standardize_words(url: str, text: str) -> List[str]:
     """
     Standardize words and filter stopword
     At first, we get the classification of words according to nltk library.
@@ -202,7 +204,9 @@ def standardize_words(text: str) -> List[str]:
     """
     # todo: 1. logger()函数获取所有pages累积的words字典
     # todo: 2. current_page_word = 0
-    words = []
+    counter_all_word_num_path, counter_page_word_num_path = 'counter_all_word_num.pkl', 'counter_page_word_num.pkl'
+    counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
+    current_page_word_num = 0
     lemmatizer = WordNetLemmatizer()
     unstandardized_words = word_tokenize(text.lower())
     word_pos_tags = nltk.pos_tag(unstandardized_words)
@@ -210,7 +214,6 @@ def standardize_words(text: str) -> List[str]:
         # Special case filter
         if special_case_filter(word_pos_tag[0]) == '':
             continue
-
         # Get the classification of words and do the initial filter
         wordnet_tag = pos_tags_filter(word_pos_tag[1])
         if wordnet_tag == '':
@@ -218,7 +221,8 @@ def standardize_words(text: str) -> List[str]:
         elif wordnet_tag == 'add':
             # todo: replace the code blow
             # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
-            words.append(word_pos_tag[0])
+            counter_all_word_num.update(word_pos_tag[0])
+            current_page_word_num += 1
         else:
             # Lemmatization
             standardize_word = lemmatizer.lemmatize(word_pos_tag[0], wordnet_tag)
@@ -227,12 +231,13 @@ def standardize_words(text: str) -> List[str]:
             if stopwords_filter(standardize_word) == '':
                 continue
             else:
-                # todo: 3. 同2
-                words.append(standardize_word)
+                counter_all_word_num.update(standardize_word)
+                current_page_word_num += 1
     # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
     # todo: 5. logger()保存2个pkl
-
-    return words
+    counter_page_word_num.update({url: current_page_word_num})
+    logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
+    # return words
 
 
 def special_case_filter(word: str) -> str:
@@ -269,20 +274,21 @@ def stopwords_filter(word: str) -> str:
     return word
 
 
-def logger(f_path:str, read:bool) -> dict:
+def logger(f_path:str, dict=None) -> dict:
     """
     :param f_path: File path
-    :param read: True: read, False: save
+    :param dict: None: read, else: the dictionary for save
     :return: Dict from pkl file
     """
-
-    # todo: 读取2个 pkl文件
-    # todo: current_page_count = 0
-    # todo: f_all_pages_words = open("f_all_pages_words.pkl")
-    # todo: all_pages_words = pickle.load(f_all_pages_words)
-    # todo: f_all_pages_words.close()
-    pass
-
+    if dict is None:
+        f = open(f_path, 'rb')
+        counter = pkl.load(f)
+        f.close()
+        return counter
+    else:
+        f = open(f_path, 'wb')
+        pkl.dump(dict, f)
+        f.close()
 
 
 
