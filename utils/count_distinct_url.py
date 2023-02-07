@@ -46,13 +46,17 @@ def count_number_subdomain(links: Set[str], excluded: Set[str]):
         parsed = urlparse(li)
         if parsed.netloc in excluded:
             continue
+        if not parsed.netloc.__contains__("ics.uci.edu"):
+            continue
         if subdomain.__contains__(parsed.netloc):
             subdomain[parsed.netloc] += 1
         else:
             subdomain[parsed.netloc] = 1
-    sorted(subdomain)
-    print(subdomain)
+    tmp = sorted(subdomain.items(), key=lambda x: (-x[1], x[0]))
+    for t in tmp:
+        print("\"" + t[0] + "\" : " + str(t[1]) + ",")
+    # print(subdomain)
 
 
 if __name__ == '__main__':
-    count_number_subdomain(count_distinct_url("path/to/Worker.log"), {"gitlab.ics.uci.edu"})
+    count_number_subdomain(count_distinct_url("../Logs/Worker.log"), {"gitlab.ics.uci.edu"})
