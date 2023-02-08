@@ -13,6 +13,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 import pickle as pkl
 import os
 from collections import Counter
+from simhash import Simhash
 
 TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
 TAGS_VERB = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'VP']
@@ -222,9 +223,9 @@ def standardize_words(url: str, text: str) -> List[str]:
     """
     # todo: 1. logger()函数获取所有pages累积的words字典
     # todo: 2. current_page_word = 0
-    counter_all_word_num_path, counter_page_word_num_path = 'counter_all_word_num.pkl', 'counter_page_word_num.pkl'
-    counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
-    current_page_word_num = 0
+    counter_all_word_num_path, counter_page_word_num_path, hash_values_path = 'counter_all_word_num.pkl', 'counter_page_word_num.pkl', 'hash_values.pkl'
+    # counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
+    word_list, current_page_word_num = [], 0
     lemmatizer = WordNetLemmatizer()
     unstandardized_words = word_tokenize(text.lower())
     word_pos_tags = nltk.pos_tag(unstandardized_words)
@@ -239,7 +240,8 @@ def standardize_words(url: str, text: str) -> List[str]:
         elif wordnet_tag == 'add':
             # todo: replace the code blow
             # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
-            counter_all_word_num.update([word_pos_tag[0]])
+            word_list.append(word_pos_tag[0])
+            # counter_all_word_num.update([word_pos_tag[0]])
             current_page_word_num += 1
         else:
             # Lemmatization
@@ -249,12 +251,16 @@ def standardize_words(url: str, text: str) -> List[str]:
             if stopwords_filter(standardize_word) == '':
                 continue
             else:
-                counter_all_word_num.update([standardize_word])
+                word_list.append(standardize_word)
+                # counter_all_word_num.update([standardize_word])
                 current_page_word_num += 1
     # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
     # todo: 5. logger()保存2个pkl
-    counter_page_word_num.update({url: current_page_word_num})
-    logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
+    if similarity_comparison(word_list=word_list, f_path=hash_values_path) is False:
+        counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
+        counter_all_word_num.update(word_list)
+        counter_page_word_num.update({url: current_page_word_num})
+        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
     # return words
 
 
@@ -309,3 +315,30 @@ def logger(f_path:str, dict=None) -> dict:
         f = open(f_path, 'wb')
         pkl.dump(dict, f)
         f.close()
+
+def hamming_distance(int_a, int_b):
+    x = (int_a ^ int_b) & ((1 << 64) - 1)
+    ans = 0
+    while x:
+        ans += 1
+        x &= x - 1
+    return ans
+
+def similarity_comparison(word_list:list, f_path:str, hash_threshold=3) -> bool:
+    page_hash_value = Simhash(word_list).value
+    if os.path.isfile(f_path) is False:
+        f = open('hash_values.pkl', 'wb')
+        pkl.dump([page_hash_value], f)
+        f.close()
+        return False
+    else:
+        f = open(f_path, 'rb')
+        hash_values = pkl.load(f)
+        f.close()
+    for hash_value in hash_values:
+        if hamming_distance(hash_value, page_hash_value) <= hash_threshold:
+            return True
+    f = open('hash_values.pkl', 'wb')
+    pkl.dump(hash_values.append(page_hash_value), f)
+    f.close()
+    return False
