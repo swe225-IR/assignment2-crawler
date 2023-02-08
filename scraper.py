@@ -327,7 +327,7 @@ def hamming_distance(int_a, int_b):
 def similarity_comparison(word_list:list, f_path:str, hash_threshold=3) -> bool:
     page_hash_value = Simhash(word_list).value
     if os.path.isfile(f_path) is False:
-        f = open('hash_values.pkl', 'wb')
+        f = open(f_path, 'wb')
         pkl.dump([page_hash_value], f)
         f.close()
         return False
@@ -335,10 +335,11 @@ def similarity_comparison(word_list:list, f_path:str, hash_threshold=3) -> bool:
         f = open(f_path, 'rb')
         hash_values = pkl.load(f)
         f.close()
-    for hash_value in hash_values:
-        if hamming_distance(hash_value, page_hash_value) <= hash_threshold:
-            return True
-    f = open('hash_values.pkl', 'wb')
-    pkl.dump(hash_values.append(page_hash_value), f)
-    f.close()
-    return False
+        for hash_value in hash_values:
+            if hamming_distance(hash_value, page_hash_value) <= hash_threshold:
+                return True
+        f = open(f_path, 'wb')
+        hash_values.append(page_hash_value)
+        pkl.dump(hash_values, f)
+        f.close()
+        return False
