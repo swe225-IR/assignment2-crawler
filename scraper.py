@@ -129,7 +129,8 @@ def is_valid(url: str) -> bool:
         elif not re.match(r"(.*\.(i?cs|informatics|stat)|today)\.uci\.edu$", parsed.netloc.lower()):
             return False
         elif (re.match(r"^today\.uci\.edu$", parsed.netloc) and not re.match(
-                r"^/department/information_computer_sciences/\.*", parsed.path)):  # todo: 没看见这个url
+                r"^/department/information_computer_sciences/\.*",
+                parsed.path)):  # todo: this url has not been seen yet
             return False
         elif re.match(r"gitlab\.ics\.uci\.edu", parsed.netloc):
             return False
