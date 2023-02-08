@@ -43,8 +43,8 @@ WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'ar
 
 
 def scraper(url: str, resp: Response) -> List[str]:
-    # words = extract_words(url, resp)
-    extract_words(url, resp)
+    if extract_words(url, resp):
+        return []
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -190,27 +190,27 @@ def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
 
 
-def extract_words(url: str, resp: Response) -> List[str]:
+def extract_words(url: str, resp: Response) -> bool:
     """
     Retrieve and standardize word.
     :param resp: URL response
-    :return: Standardized words
+    :return: whether continuing analysis
     """
-    words = []
     if resp.status != 200:
-        return words
+        return True
 
     if not resp.raw_response or not resp.raw_response.content:
-        return words
+        return True
 
     html = etree.HTML(resp.raw_response.content)
+    if not html:
+        return True
     soup = BeautifulSoup(etree.tostring(html).decode('utf-8'), features="html.parser")
     raw = soup.get_text()
-    standardize_words(url, raw.lower())
-    # return standardize_words(url, raw.lower())
+    return standardize_words(url, raw)
 
 
-def standardize_words(url: str, text: str):
+def standardize_words(url: str, text: str) -> bool:
     """
     Standardize words and filter stopword
     At first, we get the classification of words according to nltk library.
@@ -219,6 +219,7 @@ def standardize_words(url: str, text: str):
     Forth, we do a final filter based on stopword.
     :param url: url of this web content
     :param text: Web content
+    :return: discarded or not
     """
     # todo: 1. logger()函数获取所有pages累积的words字典
     # todo: 2. current_page_word = 0
@@ -255,14 +256,15 @@ def standardize_words(url: str, text: str):
                 current_page_word_num += 1
     # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
     # todo: 5. logger()保存2个pkl
-    if similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path) is False:
+    flag = similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path)
+    if flag is False:
         counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(
             counter_page_word_num_path)
         counter_all_word_num.update(word_list)
         counter_page_word_num.update({url: current_page_word_num})
         logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path,
                                                                         counter_page_word_num)
-    # return words
+    return flag
 
 
 def special_case_filter(word: str) -> str:
@@ -327,7 +329,7 @@ def hamming_distance(int_a, int_b):
     return ans
 
 
-def similarity_comparison(url: str, word_list: list, f_path: str, hash_threshold=10) -> bool:
+def similarity_comparison(url: str, word_list: list, f_path: str, hash_threshold=8) -> bool:
     page_hash_value = Simhash(word_list).value
     if os.path.isfile(f_path) is False:
         f = open(f_path, 'wb')
