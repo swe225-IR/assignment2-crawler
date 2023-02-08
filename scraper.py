@@ -39,7 +39,8 @@ STOP_WORDS = {'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', '
               'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with',
               "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself',
               'yourselves'}
-WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn', 'weren'}
+WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn',
+                     'weren'}
 
 
 def scraper(url: str, resp: Response) -> List[str]:
@@ -211,15 +212,15 @@ def extract_words(url: str, resp: Response) -> List[str]:
     # return standardize_words(url, raw.lower())
 
 
-def standardize_words(url: str, text: str) -> List[str]:
+def standardize_words(url: str, text: str):
     """
     Standardize words and filter stopword
     At first, we get the classification of words according to nltk library.
     Second, we do an initial filter for special cases like special character.
     Third, we do a second filter and lemmatization based on the classification.
     Forth, we do a final filter based on stopword.
+    :param url: url of this web content
     :param text: Web content
-    :return: Standardized words
     """
     # todo: 1. logger()函数获取所有pages累积的words字典
     # todo: 2. current_page_word = 0
@@ -256,11 +257,13 @@ def standardize_words(url: str, text: str) -> List[str]:
                 current_page_word_num += 1
     # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
     # todo: 5. logger()保存2个pkl
-    if similarity_comparison(word_list=word_list, f_path=hash_values_path) is False:
-        counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
+    if similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path) is False:
+        counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(
+            counter_page_word_num_path)
         counter_all_word_num.update(word_list)
         counter_page_word_num.update({url: current_page_word_num})
-        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
+        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path,
+                                                                        counter_page_word_num)
     # return words
 
 
@@ -298,7 +301,7 @@ def stopwords_filter(word: str) -> str:
     return word
 
 
-def logger(f_path:str, dict=None) -> dict:
+def logger(f_path: str, dict=None) -> dict:
     """
     :param f_path: File path
     :param dict: None: read, else: the dictionary for save
@@ -316,6 +319,7 @@ def logger(f_path:str, dict=None) -> dict:
         pkl.dump(dict, f)
         f.close()
 
+
 def hamming_distance(int_a, int_b):
     x = (int_a ^ int_b) & ((1 << 64) - 1)
     ans = 0
@@ -324,7 +328,8 @@ def hamming_distance(int_a, int_b):
         x &= x - 1
     return ans
 
-def similarity_comparison(word_list:list, f_path:str, hash_threshold=3) -> bool:
+
+def similarity_comparison(url: str, word_list: list, f_path: str, hash_threshold=10) -> bool:
     page_hash_value = Simhash(word_list).value
     if os.path.isfile(f_path) is False:
         f = open(f_path, 'wb')
@@ -337,6 +342,7 @@ def similarity_comparison(word_list:list, f_path:str, hash_threshold=3) -> bool:
         f.close()
         for hash_value in hash_values:
             if hamming_distance(hash_value, page_hash_value) <= hash_threshold:
+                print("[simhash filter] -> " + url)
                 return True
         f = open(f_path, 'wb')
         hash_values.append(page_hash_value)
