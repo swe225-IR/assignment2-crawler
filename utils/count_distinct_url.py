@@ -48,11 +48,14 @@ def count_number_subdomain(links: Set[str], excluded: Set[str]):
             continue
         if not parsed.netloc.__contains__("ics.uci.edu"):
             continue
+        ind = parsed.netloc.find("ics.uci.edu")
+        if ind - 1 >= 0 and parsed.netloc[ind - 1] != '.':
+            continue
         if subdomain.__contains__(parsed.netloc):
             subdomain[parsed.netloc] += 1
         else:
             subdomain[parsed.netloc] = 1
-    tmp = sorted(subdomain.items(), key=lambda x: (-x[1], x[0]))
+    tmp = sorted(subdomain.items(), key=lambda x: x[0])
     for t in tmp:
         print("\"" + t[0] + "\" : " + str(t[1]) + ",")
     # print(subdomain)
