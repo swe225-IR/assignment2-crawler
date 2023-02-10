@@ -29,7 +29,7 @@ Authors: Shilong Li, Wenjun Huang, Yang Liu
 
 ### Report
 
-See [report](./Assignment-Report.md).
+See [report](./CS221_assignment2.pdf).
 
 ### Specifications
 
@@ -51,7 +51,7 @@ See [report](./Assignment-Report.md).
 - [x] Detect and avoid infinite traps
 - [x] Detect and avoid sets of similar pages with no information
 - [x] Detect and avoid dead URLs that return a 200 status but no data
-- [x] Detect and avoid crawling very large files, especially if they have low information value
+- [ ] Detect and avoid crawling very large files, especially if they have low information value
 
 ### Additional Libraries
 See [requirements.txt](./requirements.txt)
