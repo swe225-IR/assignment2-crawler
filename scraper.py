@@ -20,7 +20,7 @@ TAGS_ADJ = ['JJ', 'JJR', 'JJS', 'ADJP', 'ADVP']
 TAGS_NOUN = ['NN', 'NNS', 'NNP', 'NNPS', 'NP']
 TAGS_ADV = ['RB', 'RBR', 'RBS']
 ADV_OTHERS = ['CD', 'EX', 'MD', 'UH', 'WDT', 'WP', 'WP$', 'WRB', 'SBAR', 'PRT', 'INTJ', 'PNP', '-SBJ', '-OBJ']
-STOP_WORDS = {'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't",
+STOP_WORDS = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't",
               'as',
               'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', "can't",
               'cannot', 'could', "couldn't", 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down',
@@ -37,9 +37,9 @@ STOP_WORDS = {'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', '
               'very', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's",
               'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with',
               "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself',
-              'yourselves'}
-WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn',
-                     'weren'}
+              'yourselves']
+WORD_ABBREVIATION = ['re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn',
+                     'weren']
 
 
 def scraper(url: str, resp: Response) -> List[str]:
@@ -208,10 +208,10 @@ def extract_words(url: str, resp: Response) -> bool:
 def standardize_words(url: str, text: str) -> bool:
     """
     Standardize words and filter stopword
-    At first, we get the classification of words according to nltk library.
-    Second, we do an initial filter for special cases like special character.
-    Third, we do a second filter and lemmatization based on the classification.
-    Forth, we do a final filter based on stopword.
+    At first, we do a final filter based on stopword.
+    Second, we get the classification of words according to nltk library.
+    Third, we do an initial filter for special cases like special character.
+    Forth, we do a second filter and lemmatization based on the classification.
     :param url: url of this web content
     :param text: Web content
     """
@@ -221,27 +221,28 @@ def standardize_words(url: str, text: str) -> bool:
     unstandardized_words = word_tokenize(text.lower())
     word_pos_tags = nltk.pos_tag(unstandardized_words)
     for word_pos_tag in word_pos_tags:
+        word = word_pos_tag[0].replace(' ', '')
+
+        # Remove stopwords
+        if stopwords_filter(word) == '':
+            continue
 
         # Special case filter
-        if special_case_filter(word_pos_tag[0]) == '':
+        if special_case_filter(word) == '':
             continue
         # Get the classification of words and do the initial filter
         wordnet_tag = pos_tags_filter(word_pos_tag[1])
         if wordnet_tag == '':
             continue
         elif wordnet_tag == 'add':
-            word_list.append(word_pos_tag[0])
+            word_list.append(word)
             current_page_word_num += 1
         else:
             # Lemmatization
-            standardize_word = lemmatizer.lemmatize(word_pos_tag[0], wordnet_tag)
+            standardize_word = lemmatizer.lemmatize(word, wordnet_tag)
+            word_list.append(standardize_word)
+            current_page_word_num += 1
 
-            # Remove stopwords
-            if stopwords_filter(standardize_word) == '':
-                continue
-            else:
-                word_list.append(standardize_word)
-                current_page_word_num += 1
     flag = similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path)
     if flag is False:
         counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(
@@ -282,7 +283,7 @@ def pos_tags_filter(tag: str) -> str:
 
 
 def stopwords_filter(word: str) -> str:
-    if word.replace(' ', '') in STOP_WORDS:
+    if word in STOP_WORDS:
         return ''
     return word
 
