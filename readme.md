@@ -54,6 +54,4 @@ See [report](./Assignment-Report.md).
 - [ ] Detect and avoid crawling very large files, especially if they have low information value
 
 ### Additional Libraries
-```commandline
-pip install lxml nltk bs4 mdpdf
-```
+See [requirements.txt](./requirements.txt)
