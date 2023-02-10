@@ -43,7 +43,6 @@ WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'ar
 
 
 def scraper(url: str, resp: Response) -> List[str]:
-    # words = extract_words(url, resp)
     extract_words(url, resp)
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -202,7 +201,6 @@ def extract_words(url: str, resp: Response) -> List[str]:
     soup = BeautifulSoup(etree.tostring(html).decode('utf-8'), features="html.parser")
     raw = soup.get_text()
     standardize_words(url, raw.lower())
-    # return standardize_words(url, raw.lower())
 
 
 def standardize_words(url: str, text: str):
@@ -215,10 +213,7 @@ def standardize_words(url: str, text: str):
     :param url: url of this web content
     :param text: Web content
     """
-    # todo: 1. logger()函数获取所有pages累积的words字典
-    # todo: 2. current_page_word = 0
     counter_all_word_num_path, counter_page_word_num_path, hash_values_path = 'counter_all_word_num.pkl', 'counter_page_word_num.pkl', 'hash_values.pkl'
-    # counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(counter_page_word_num_path)
     word_list, current_page_word_num = [], 0
     lemmatizer = WordNetLemmatizer()
     unstandardized_words = word_tokenize(text.lower())
@@ -232,10 +227,7 @@ def standardize_words(url: str, text: str):
         if wordnet_tag == '':
             continue
         elif wordnet_tag == 'add':
-            # todo: replace the code blow
-            # todo: 2. 这里不用words存，直接改第1步读的字典值就行，然后current_page_word += 1
             word_list.append(word_pos_tag[0])
-            # counter_all_word_num.update([word_pos_tag[0]])
             current_page_word_num += 1
         else:
             # Lemmatization
@@ -246,18 +238,14 @@ def standardize_words(url: str, text: str):
                 continue
             else:
                 word_list.append(standardize_word)
-                # counter_all_word_num.update([standardize_word])
                 current_page_word_num += 1
-    # todo: 4. logger()函数获取存有最大page的words数量和相应url的pkl文件，用current_page_word进行比较更新
-    # todo: 5. logger()保存2个pkl
+    
     if similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path) is False:
         counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(
             counter_page_word_num_path)
         counter_all_word_num.update(word_list)
         counter_page_word_num.update({url: current_page_word_num})
-        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path,
-                                                                        counter_page_word_num)
-    # return words
+        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
 
 
 def special_case_filter(word: str) -> str:

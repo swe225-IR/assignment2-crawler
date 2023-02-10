@@ -58,6 +58,7 @@ def count_number_subdomain(links: Set[str], excluded=None):
             subdomain[parsed.netloc] += 1
         else:
             subdomain[parsed.netloc] = 1
+    # tmp = sorted(subdomain.items(), key=lambda x: x[0])
     tmp = sorted(subdomain.items(), key=lambda x: x[0].lower())
     for t in tmp:
         print("\"" + t[0] + "\" : " + str(t[1]) + ",")
