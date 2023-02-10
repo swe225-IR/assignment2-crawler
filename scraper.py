@@ -60,10 +60,6 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     links = list()
-    # todo: 1. what if resp.url does not equal to the url (redirect ?)
-    # 2. trap https://swiki.ics.uci.edu/doku.php/projects:maint-spring-2021?tab_details=edit&do=media&tab_files=files&image=virtual_environments%3Ajupyterhub%3Anotebooks.jpg&ns=security
-    # 3. https://urldefense.com/v3/__https:/rloganiv.github.io/__;!!CzAuKJ42GuquVTTmVmPViYEvSg!Pe8w9cwoRSztNHlTyrGJlybQ4ZD_5-oWKbzxvTlVr09ZfoUzeTWj07XuyrEktXsDyERsM1m61D8GD7Y$
-    # -> solution: https://help.proofpoint.com/Threat_Insight_Dashboard/Concepts/How_do_I_decode_a_rewritten_URL%3F
     """
     processing:
     <a href="URL">
@@ -75,7 +71,7 @@ def extract_next_links(url: str, resp: Response) -> List[str]:
             A script (like href="javascript:alert('Hello');")
         URL: https  ://    www.a.b.c  /path/to/file   ;    a=b;c=d  ?    e=f&r=z
             scheme           netloc       path             params         query
-            PS: params 存在这种情况：https://www.a.b.c/path;a, where there is no '='
+            PS: params can exist like this: https://www.a.b.c/path;a, where there is no '='
     """
     if resp.status == 200:
         if not resp.raw_response or not resp.raw_response.content:
@@ -129,8 +125,7 @@ def is_valid(url: str) -> bool:
         elif not re.match(r"(.*\.(i?cs|informatics|stat)|today)\.uci\.edu$", parsed.netloc.lower()):
             return False
         elif (re.match(r"^today\.uci\.edu$", parsed.netloc) and not re.match(
-                r"^/department/information_computer_sciences/\.*",
-                parsed.path)):  # todo: this url has not been seen yet
+                r"^/department/information_computer_sciences/\.*", parsed.path)):
             return False
         elif re.match(r"gitlab\.ics\.uci\.edu", parsed.netloc):
             return False
