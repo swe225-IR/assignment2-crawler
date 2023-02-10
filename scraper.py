@@ -310,7 +310,7 @@ def hamming_distance(int_a, int_b):
     return ans
 
 
-def similarity_comparison(url: str, word_list: list, f_path: str, hash_threshold=10) -> bool:
+def similarity_comparison(url: str, word_list: list, f_path: str, hash_threshold=8) -> bool:
     page_hash_value = Simhash(word_list).value
     if os.path.isfile(f_path) is False:
         f = open(f_path, 'wb')
