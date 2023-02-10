@@ -221,8 +221,6 @@ def standardize_words(url: str, text: str) -> bool:
     unstandardized_words = word_tokenize(text.lower())
     word_pos_tags = nltk.pos_tag(unstandardized_words)
     for word_pos_tag in word_pos_tags:
-        # In case of space
-        word_pos_tag[0] = word_pos_tag[0].replace(' ', '')
 
         # Special case filter
         if special_case_filter(word_pos_tag[0]) == '':
@@ -284,7 +282,7 @@ def pos_tags_filter(tag: str) -> str:
 
 
 def stopwords_filter(word: str) -> str:
-    if word in STOP_WORDS:
+    if word.replace(' ', '') in STOP_WORDS:
         return ''
     return word
 
