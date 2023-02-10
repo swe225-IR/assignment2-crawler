@@ -28,10 +28,10 @@ def count_distinct_url(path: str) -> Set[str]:
                     pass
             else:
                 break
-    print(len(link))
-    print(error_code)
-    print(c)
-    print(e)
+    print("# of distinct links: ", len(link))
+    # print(error_code)
+    # print(c)
+    # print(e)
     return link
 
 
@@ -61,7 +61,7 @@ def count_number_subdomain(links: Set[str], excluded=None):
     # tmp = sorted(subdomain.items(), key=lambda x: x[0])
     tmp = sorted(subdomain.items(), key=lambda x: x[0].lower())
     for t in tmp:
-        print("\"" + t[0] + "\" : " + str(t[1]) + ",")
+        print("(\"" + t[0] + "\", " + str(t[1]) + "),")
     # print(subdomain)
 
 
