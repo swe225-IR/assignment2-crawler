@@ -35,6 +35,20 @@ def count_distinct_url(path: str) -> Set[str]:
     return link
 
 
+def count_postfix(links: Set[str]):
+    s = set()
+    for li in links:
+        url_parsed = urlparse(li)
+        if url_parsed.path.lower()[-6:].__contains__(".") and not url_parsed.path.lower()[-6:].__contains__(
+                "htm") and not url_parsed.path.lower()[-6:].__contains__("html") and not url_parsed.path.lower()[
+                                                                                         -6:].__contains__(
+            "xml") and not url_parsed.path.lower()[-6:].__contains__("php"):
+            ind = url_parsed.path.lower().find(".")
+            s.add(url_parsed.path.lower()[ind + 1:].strip())
+    for a in s:
+        print(a, "|", end='')
+
+
 def count_number_subdomain(links: Set[str], excluded=None):
     """
     Number of subdomains
