@@ -250,8 +250,10 @@ def standardize_words(url: str, text: str) -> bool:
             counter_page_word_num_path)
         counter_all_word_num.update(word_list)
         counter_page_word_num.update({url: current_page_word_num})
-        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
+        logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path,
+                                                                        counter_page_word_num)
     return flag
+
 
 def special_case_filter(word: str) -> str:
     if len(word) == 1:
