@@ -43,7 +43,8 @@ WORD_ABBREVIATION = {'re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'ar
 
 
 def scraper(url: str, resp: Response) -> List[str]:
-    extract_words(url, resp)
+    if extract_words(url, resp):
+        return []
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -184,26 +185,27 @@ def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
 
 
-def extract_words(url: str, resp: Response) -> List[str]:
+def extract_words(url: str, resp: Response) -> bool:
     """
     Retrieve and standardize word.
     :param resp: URL response
     :return: Standardized words
     """
-    words = []
     if resp.status != 200:
-        return words
+        return True
 
     if not resp.raw_response or not resp.raw_response.content:
-        return words
+        return True
 
     html = etree.HTML(resp.raw_response.content)
+    if not html:
+        return True
     soup = BeautifulSoup(etree.tostring(html).decode('utf-8'), features="html.parser")
     raw = soup.get_text()
-    standardize_words(url, raw.lower())
+    return standardize_words(url, raw.lower())
 
 
-def standardize_words(url: str, text: str):
+def standardize_words(url: str, text: str) -> bool:
     """
     Standardize words and filter stopword
     At first, we get the classification of words according to nltk library.
@@ -242,14 +244,14 @@ def standardize_words(url: str, text: str):
             else:
                 word_list.append(standardize_word)
                 current_page_word_num += 1
-    
-    if similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path) is False:
+    flag = similarity_comparison(url=url, word_list=word_list, f_path=hash_values_path)
+    if flag is False:
         counter_all_word_num, counter_page_word_num = logger(counter_all_word_num_path), logger(
             counter_page_word_num_path)
         counter_all_word_num.update(word_list)
         counter_page_word_num.update({url: current_page_word_num})
         logger(counter_all_word_num_path, counter_all_word_num), logger(counter_page_word_num_path, counter_page_word_num)
-
+    return flag
 
 def special_case_filter(word: str) -> str:
     if len(word) == 1:
