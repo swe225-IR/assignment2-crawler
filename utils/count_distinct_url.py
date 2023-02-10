@@ -1,3 +1,4 @@
+import sys
 from typing import Set
 from urllib.parse import urlparse
 
@@ -34,13 +35,15 @@ def count_distinct_url(path: str) -> Set[str]:
     return link
 
 
-def count_number_subdomain(links: Set[str], excluded: Set[str]):
+def count_number_subdomain(links: Set[str], excluded=None):
     """
     Number of subdomains
     :param links: URLs crawled
     :param excluded: excluded from the results
     :return: NoneType
     """
+    if excluded is None:
+        excluded = {"gitlab.ics.uci.edu"}
     subdomain = {}
     for li in links:
         parsed = urlparse(li)
@@ -55,11 +58,11 @@ def count_number_subdomain(links: Set[str], excluded: Set[str]):
             subdomain[parsed.netloc] += 1
         else:
             subdomain[parsed.netloc] = 1
-    tmp = sorted(subdomain.items(), key=lambda x: x[0])
+    tmp = sorted(subdomain.items(), key=lambda x: x[0].lower())
     for t in tmp:
         print("\"" + t[0] + "\" : " + str(t[1]) + ",")
     # print(subdomain)
 
 
 if __name__ == '__main__':
-    count_number_subdomain(count_distinct_url("../Logs/Worker.log"), {"gitlab.ics.uci.edu"})
+    count_number_subdomain(count_distinct_url(sys.argv[1]))
